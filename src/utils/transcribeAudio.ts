@@ -1,15 +1,19 @@
-import AutomaticSpeechRecognitionPipeline from "../AutomaticSpeechRecognitionPipeline.ts";
-import { TextStreamer } from "@huggingface/transformers";
+import {
+  TextStreamer,
+  PreTrainedTokenizer,
+  Processor,
+  PreTrainedModel,
+} from "@huggingface/transformers";
 
 const transcribeAudio = async (
   audio: Float32Array,
   language: string,
   maxNewTokens: number,
+  tokenizer: PreTrainedTokenizer,
+  processor: Processor,
+  model: PreTrainedModel,
   tpsUpdateCallback: (tps: number) => void = () => {},
 ): Promise<string> => {
-  const [tokenizer, processor, model] =
-    await AutomaticSpeechRecognitionPipeline.getInstance();
-
   let startTime;
   let numTokens = 0;
   const callback_function = () => {

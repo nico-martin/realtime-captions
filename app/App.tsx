@@ -1,5 +1,6 @@
 import React from "react";
-import useRealtimeTranscription from "./useRealtimeTranscription.ts";
+import useRealtimeTranscription from "./useRealtimeCaptions.ts";
+import { createRoot } from "react-dom/client";
 
 enum State {
   IDLE = "IDLE",
@@ -57,7 +58,7 @@ const App: React.FC = () => {
             setState(State.RUNNING);
           } else {
             setState(State.LOADING);
-            await transcription.load();
+            await transcription.load(activeAudioDevice);
             setState(State.LOADED);
           }
         }}
@@ -80,9 +81,8 @@ const App: React.FC = () => {
         </button>
       )}
       <p>{transcription.output}</p>
-      <p>{transcription.tps}</p>
     </div>
   );
 };
 
-export default App;
+createRoot(document.getElementById("root")!).render(<App />);
