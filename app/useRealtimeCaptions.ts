@@ -1,5 +1,6 @@
 import React from "react";
-import RealtimeCaptions from "../src/RealtimeCaptions.ts";
+//import RealtimeCaptions from "../src/RealtimeCaptions.ts";
+import SimpleTranscriber from "../src/SimpleTranscriber.ts";
 
 const useRealtimeCaptions = (): {
   load: (audioDeviceId: string) => Promise<void>;
@@ -12,10 +13,10 @@ const useRealtimeCaptions = (): {
   const [output, setOutput] = React.useState<string>("");
   const [tps, setTps] = React.useState<number>(0);
   const [realtimeCaptionsInstance, setRealtimeCaptionsInstance] =
-    React.useState<RealtimeCaptions>(null);
+    React.useState<SimpleTranscriber>(null);
 
   React.useEffect(() => {
-    const realtimeCaptions = new RealtimeCaptions();
+    const realtimeCaptions = new SimpleTranscriber();
     realtimeCaptions.addEventListener("outputChanged", () =>
       setOutput(realtimeCaptions.output),
     );
