@@ -1,0 +1,100 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-grid);
+  padding-bottom: 0;
+}
+
+.footer {
+  padding: var(--space-grid-half);
+  text-align: center;
+  font-size: var(--fs-xsmall);
+}
+
+.description {
+  width: 75%;
+  margin-top: var(--space-grid);
+
+  p {
+    font-size: var(--fs-big);
+  }
+
+  p + p {
+    margin-top: var(--space-grid-half);
+  }
+}
+
+.main {
+  display: flex;
+  gap: var(--space-grid);
+  align-items: stretch;
+  height: 100%;
+
+  .controls,
+  .transcription {
+    width: 50%;
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-grid);
+}
+
+.transcription {
+  padding: var(--space-grid);
+  background-color: var(--c-bkg-dark);
+  border-radius: 0.75rem;
+
+  i {
+    opacity: 0.4;
+    font-style: normal;
+  }
+
+  p {
+    font-size: var(--fs-xbig);
+    font-weight: bold;
+  }
+}
+
+.selectMicIconWrapper {
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &::after {
+    content: "";
+    width: 1.6em;
+    height: 1.6em;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+  }
+}
+
+.selectMicIcon {
+  display: block;
+  position: absolute;
+
+  svg {
+    display: block;
+  }
+}
+
+.selectMicWrapper {
+  width: 75%;
+  font-size: var(--fs-big);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.selectMic {
+  padding: 0.3rem;
+  border-radius: 0.4em;
+  width: 100%;
+}
