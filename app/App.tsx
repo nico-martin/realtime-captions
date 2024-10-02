@@ -13,6 +13,7 @@ import { IconName } from "./theme/SVG/icons.ts";
 import Icon from "./theme/SVG/Icon.tsx";
 
 import pkg from "../package.json";
+import cn from "./utils/classnames.ts";
 
 enum State {
   IDLE = "IDLE",
@@ -29,6 +30,9 @@ const App: React.FC = () => {
   >([]);
   const [activeAudioDevice, setActiveAudioDevice] =
     React.useState<string>(null);
+  const [activeLanguage, setActiveLanguage] = React.useState<string>("en");
+  const transcriptionRef = React.useRef<HTMLParagraphElement>(null);
+  const transcriptionWrapperRef = React.useRef<HTMLDivElement>(null);
 
   const setupAudioDevices = async () => {
     // ask for audio device permission
@@ -42,8 +46,16 @@ const App: React.FC = () => {
   };
 
   React.useEffect(() => {
-    //setupAudioDevices();
-  }, []);
+    if (!transcriptionRef.current) return;
+    if (!transcriptionWrapperRef.current) return;
+    const height = transcriptionRef.current.clientHeight;
+    const wrapperHeight = transcriptionWrapperRef.current.clientHeight;
+    if (height >= wrapperHeight) {
+      transcriptionWrapperRef.current.scroll(0, height);
+    }
+  }, [transcription.output.archive, transcription.output.tempOutput]);
+
+  React.useEffect(() => {}, []);
 
   return (
     <div className={styles.root}>
@@ -63,7 +75,7 @@ const App: React.FC = () => {
                 size="big"
                 icon={IconName.DOWNLOAD}
               >
-                load model
+                load model (~200 MB)
               </Button>
               <div className={styles.description}>
                 <p>
@@ -98,38 +110,69 @@ const App: React.FC = () => {
             </React.Fragment>
           ) : (
             <React.Fragment>
-              <div className={styles.selectMicWrapper}>
-                <div className={styles.selectMicIconWrapper}>
-                  <Icon
-                    className={styles.selectMicIcon}
-                    icon={IconName.MICROPHONE_OUTLINE}
-                  />
+              <div className={styles.selectWrapper}>
+                <div className={styles.selectElement}>
+                  <div className={styles.selectIconWrapper}>
+                    <Icon
+                      className={styles.selectMicIcon}
+                      icon={IconName.MICROPHONE_OUTLINE}
+                    />
+                  </div>
+                  <select
+                    className={cn(styles.select, styles.selectMic)}
+                    disabled={state === State.RUNNING}
+                    onChange={(e) => setActiveAudioDevice(e.target.value)}
+                  >
+                    {audioDevices.map((device) => (
+                      <option
+                        selected={device.deviceId === activeAudioDevice}
+                        value={device.deviceId}
+                        key={device.deviceId}
+                      >
+                        {device.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <select
-                  className={styles.selectMic}
-                  //disabled={state !== State.IDLE}
-                  onChange={(e) => setActiveAudioDevice(e.target.value)}
-                >
-                  {audioDevices.map((device) => (
-                    <option
-                      selected={device.deviceId === activeAudioDevice}
-                      value={device.deviceId}
-                      key={device.deviceId}
-                    >
-                      {device.label}
-                    </option>
-                  ))}
-                </select>
+                <div className={styles.selectElement}>
+                  <div className={styles.selectIconWrapper}>
+                    <Icon
+                      className={styles.selectMicIcon}
+                      icon={IconName.TRANSLATE}
+                    />
+                  </div>
+                  <select
+                    className={cn(styles.select, styles.selectLang)}
+                    disabled={state === State.RUNNING}
+                    onChange={(e) => setActiveLanguage(e.target.value)}
+                  >
+                    {transcription.languages
+                      .sort((a, b) => (a.label < b.label ? -1 : 1))
+                      .map((language) => (
+                        <option
+                          selected={language.value === activeLanguage}
+                          value={language.value}
+                          key={language.value}
+                        >
+                          {language.label}
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
               <Button
                 size="big"
                 round
+                pulsate={state === State.RUNNING}
                 onClick={async () => {
                   if (state === State.RUNNING) {
                     transcription.stop();
                     setState(State.LOADED);
                   } else if (state === State.LOADED) {
-                    await transcription.start(activeAudioDevice);
+                    await transcription.start(
+                      activeAudioDevice,
+                      activeLanguage,
+                    );
                     setState(State.RUNNING);
                   } else {
                     setState(State.LOADING);
@@ -150,28 +193,29 @@ const App: React.FC = () => {
             </React.Fragment>
           )}
         </div>
-        <div className={styles.transcription}>
-          <p>
-            {transcription.output === "" ? (
-              <i>waiting...</i>
-            ) : (
-              transcription.output
-            )}
+        <div className={styles.transcription} ref={transcriptionWrapperRef}>
+          <p ref={transcriptionRef}>
+            <span className={styles.transcriptionArchive}>
+              {transcription.output.archive.join(" ")}
+            </span>{" "}
+            <span>{transcription.output.tempOutput}</span>
           </p>
         </div>
       </main>
       <footer className={styles.footer}>
-        v.{pkg.version} - by{" "}
-        <a href="https://nico.dev" target="_blank">
-          Nico Martin
-        </a>{" "}
-        - code on{" "}
-        <a
-          href="https://github.com/nico-martin/realtime-captions"
-          target="_blank"
-        >
-          GitHub
-        </a>
+        <p>
+          v.{pkg.version} - by{" "}
+          <a href="https://nico.dev" target="_blank">
+            Nico Martin
+          </a>{" "}
+          - code on{" "}
+          <a
+            href="https://github.com/nico-martin/realtime-captions"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </p>
       </footer>
     </div>
   );

@@ -6,27 +6,30 @@ import cn from "../../utils/classnames.ts";
 import Loader from "../Loader/Loader.tsx";
 import Icon from "../SVG/Icon.tsx";
 
-const Button = React.forwardRef<
+interface ButtonProps {
+  children?: React.JSX.Element | React.JSX.Element[] | string;
+  className?: string;
+  classNameIcon?: string;
+  onClick?: () => void;
+  layout?: "solid" | "empty" | "outline";
+  round?: boolean;
+  icon?: IconName;
+  iconRight?: boolean;
+  iconCircle?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+  color?: "black" | "primary";
+  onlyIconMobile?: boolean;
+  progress?: number;
+  noPadding?: boolean;
+  size?: "small" | "medium" | "big";
+  pulsate?: boolean;
+  [key: string]: any;
+}
+
+const Button: React.ForwardRefExoticComponent<ButtonProps> = React.forwardRef<
   HTMLButtonElement,
-  {
-    children?: React.JSX.Element | React.JSX.Element[] | string;
-    className?: string;
-    classNameIcon?: string;
-    onClick?: () => void;
-    layout?: "solid" | "empty" | "outline";
-    round?: boolean;
-    icon?: IconName;
-    iconRight?: boolean;
-    iconCircle?: boolean;
-    loading?: boolean;
-    disabled?: boolean;
-    color?: "black" | "primary";
-    onlyIconMobile?: boolean;
-    progress?: number;
-    noPadding?: boolean;
-    size?: "small" | "medium" | "big";
-    [key: string]: any;
-  }
+  ButtonProps
 >(
   (
     {
@@ -46,6 +49,7 @@ const Button = React.forwardRef<
       onlyIconMobile = false,
       noPadding = false,
       size = "medium",
+      pulsate = false,
       ...props
     },
     ref,
@@ -68,6 +72,7 @@ const Button = React.forwardRef<
           [styles.buttonNoPadding]: noPadding,
           [styles.buttonSizeSmall]: size === "small",
           [styles.buttonSizeBig]: size === "big",
+          [styles.pulsate]: pulsate,
         })}
         onClick={() => onClick()}
         ref={ref}

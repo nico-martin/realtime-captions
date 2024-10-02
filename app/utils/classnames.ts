@@ -4,7 +4,7 @@ const cn = (...classes: Array<Record<string, boolean> | string>): string =>
       typeof entry === "string"
         ? entry
         : Object.entries(entry || {})
-            .filter(([cl, append]) => append)
+            .filter(([, append]) => append)
             .map(([cl]) => cl)
             .join(" "),
     )

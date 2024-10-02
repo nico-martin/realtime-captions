@@ -7,9 +7,12 @@
 }
 
 .footer {
-  padding: var(--space-grid-half);
+  height: calc(var(--fs-xsmall) + var(--space-grid-half) * 2);
   text-align: center;
   font-size: var(--fs-xsmall);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .description {
@@ -29,7 +32,7 @@
   display: flex;
   gap: var(--space-grid);
   align-items: stretch;
-  height: 100%;
+  height: calc(100% - (var(--fs-xsmall) + var(--space-grid-half) * 2));
 
   .controls,
   .transcription {
@@ -49,9 +52,10 @@
   padding: var(--space-grid);
   background-color: var(--c-bkg-dark);
   border-radius: 0.75rem;
+  overflow: auto;
 
-  i {
-    opacity: 0.4;
+  .transcriptionArchive {
+    opacity: 0.5;
     font-style: normal;
   }
 
@@ -61,7 +65,13 @@
   }
 }
 
-.selectMicIconWrapper {
+.selectElement {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selectIconWrapper {
   line-height: 1;
   display: flex;
   justify-content: center;
@@ -85,7 +95,7 @@
   }
 }
 
-.selectMicWrapper {
+.selectWrapper {
   width: 75%;
   font-size: var(--fs-big);
   display: flex;
@@ -93,7 +103,7 @@
   gap: 1rem;
 }
 
-.selectMic {
+.select {
   padding: 0.3rem;
   border-radius: 0.4em;
   width: 100%;

@@ -9,6 +9,7 @@ import {
 } from "@huggingface/transformers";
 import getAudioFromChunks from "./utils/getAudioFromChunks.ts";
 import transcribeAudio from "./utils/transcribeAudio.ts";
+import LANGUAGES from "./utils/languages.ts";
 
 class RealtimeCaptions extends EventTarget {
   private audioContext: AudioContext;
@@ -29,9 +30,10 @@ class RealtimeCaptions extends EventTarget {
   };
   private cutAudioAt: number = 0;
   private logger: (data: any) => any;
+  public readonly languages = LANGUAGES;
   private language: string = "en";
 
-  constructor(language: string = "en", logCallback: (data: any) => any = null) {
+  constructor(logCallback: (data: any) => any = null) {
     super();
     if (!navigator.mediaDevices.getUserMedia) {
       throw "getUserMedia not supported on your browser!";
@@ -39,7 +41,6 @@ class RealtimeCaptions extends EventTarget {
     if (logCallback) {
       this.logger = logCallback;
     }
-    this.language = language;
   }
 
   get tps() {
@@ -55,7 +56,11 @@ class RealtimeCaptions extends EventTarget {
     const filteredArchive = this._outputArchive
       .filter(Boolean)
       .filter((str) => !str.startsWith(" ["));
-    return [...filteredArchive, this._tempOutput].join(" ");
+    return {
+      archive: filteredArchive,
+      tempOutput: this._tempOutput,
+      full: [...filteredArchive, this._tempOutput].join(" "),
+    };
   }
 
   set outputArchive(archive) {
@@ -140,14 +145,11 @@ class RealtimeCaptions extends EventTarget {
     this.recorder?.requestData();
   };
 
-  private generate = async (
-    audio: Float32Array,
-    language: string = this.language,
-  ): Promise<string> => {
+  private generate = async (audio: Float32Array): Promise<string> => {
     this.modelBusy = true;
     const output = await transcribeAudio(
       audio,
-      language,
+      this.language,
       64,
       this.tokenizer,
       this.processor,
@@ -210,7 +212,16 @@ class RealtimeCaptions extends EventTarget {
     await this.setUpAudio(audioDeviceId);
   };
 
-  public start = async (audioDeviceId: string) => {
+  public start = async (
+    audioDeviceId: string,
+    language: string = this.language,
+  ) => {
+    const languageKeys = Object.values(LANGUAGES).map(({ value }) => value);
+    if (!languageKeys.includes(language)) {
+      throw new Error(`Language ${language} is not supported`);
+    }
+
+    this.language = language;
     await this.setUp(audioDeviceId);
     this.recorder.start();
   };

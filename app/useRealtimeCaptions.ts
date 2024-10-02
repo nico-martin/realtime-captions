@@ -4,12 +4,17 @@ import RealtimeCaptions from "../src/RealtimeCaptions.ts";
 const useRealtimeCaptions = (): {
   load: (audioDeviceId: string) => Promise<void>;
   destroy: () => void;
-  start: (audioDeviceId: string) => Promise<void>;
+  start: (audioDeviceId: string, language?: string) => Promise<void>;
   stop: () => void;
-  output: string;
+  output: { archive: Array<string>; tempOutput: string; full: string };
   tps: number;
+  languages: Array<{ value: string; label: string }>;
 } => {
-  const [output, setOutput] = React.useState<string>("");
+  const [output, setOutput] = React.useState<{
+    archive: Array<string>;
+    tempOutput: string;
+    full: string;
+  }>({ archive: [], tempOutput: "", full: "" });
   const [tps, setTps] = React.useState<number>(0);
   const [realtimeCaptionsInstance, setRealtimeCaptionsInstance] =
     React.useState<RealtimeCaptions>(null);
@@ -33,11 +38,12 @@ const useRealtimeCaptions = (): {
     load: (audioDeviceId: string) =>
       realtimeCaptionsInstance?.setUp(audioDeviceId),
     destroy: realtimeCaptionsInstance?.destroyAudio,
-    start: (audioDeviceId: string) =>
-      realtimeCaptionsInstance?.start(audioDeviceId),
+    start: (audioDeviceId: string, language: string = null) =>
+      realtimeCaptionsInstance?.start(audioDeviceId, language),
     stop: realtimeCaptionsInstance?.stop,
     output,
     tps,
+    languages: realtimeCaptionsInstance?.languages || [],
   };
 };
 

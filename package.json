@@ -1,6 +1,6 @@
 {
   "name": "realtime-captions",
-  "version": "1.0.0",
+  "version": "0.0.4",
   "description": "",
   "author": "Nico Martin <mail@nico.dev>",
   "license": "MIT",
@@ -33,6 +33,7 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2",
+    "vite-plugin-html-config": "^2.0.2",
     "vite-plugin-svgr": "^4.2.0"
   }
 }

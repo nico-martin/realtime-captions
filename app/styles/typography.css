@@ -1,65 +1,65 @@
 :root {
-    --fs: 1rem;
-    --fs-small: 0.9rem;
-    --fs-xsmall: 0.7rem;
-    --fs-xssmall: 0.6rem;
-    --fs-big: 1.2rem;
-    --fs-xbig: 2rem;
-    --font: Affogato, sans-serif;
+  --fs: 1rem;
+  --fs-small: 0.9rem;
+  --fs-xsmall: 0.7rem;
+  --fs-xssmall: 0.6rem;
+  --fs-big: 1.2rem;
+  --fs-xbig: 1.8rem;
+  --font: Affogato, sans-serif;
 }
 
 html {
-//font-size: 2vmin;
+  //font-size: 2vmin;
 }
 
 body {
-    font-family: var(--font);
-    font-weight: 400;
-    font-size: 100%;
-    line-height: 1.4;
-    color: var(--c-p);
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: 100%;
+  line-height: 1.4;
+  color: var(--c-p);
 }
 
 b {
-    font-weight: 700;
+  font-weight: 700;
 }
 
 h1,
 h2,
 h3 {
-    font-family: var(--font);
-    font-weight: 700;
-    line-height: 1.1;
-    font-size: 1.5em;
+  font-family: var(--font);
+  font-weight: 700;
+  line-height: 1.1;
+  font-size: 1.5em;
 }
 
 h2 {
-    font-size: 1.3em;
+  font-size: 1.3em;
 }
 
 h3 {
-    font-size: 1.2em;
+  font-size: 1.2em;
 }
 
 /* button reset */
 button {
-    background-color: transparent;
-    border: none;
-    padding: 0;
+  background-color: transparent;
+  border: none;
+  padding: 0;
 }
 
 a {
-    color: var(--c-primary);
+  color: var(--c-primary);
 }
 
 .fs--small {
-    font-size: var(--fs-small);
+  font-size: var(--fs-small);
 }
 
 .fs--xsmall {
-    font-size: var(--fs-xsmall);
+  font-size: var(--fs-xsmall);
 }
 
 button {
-    color: var(--c-p);
+  color: var(--c-p);
 }

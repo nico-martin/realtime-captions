@@ -192,6 +192,35 @@
   font-size: 1.8rem;
 }
 
+.pulsate {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    outline: 5px solid var(--c-primary);
+    animation: pulsate 1s infinite;
+    z-index: -1;
+  }
+
+  &.buttonIsRound::before {
+    border-radius: 5rem;
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(0.9, 0.9);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.075, 1.175);
+    opacity: 0;
+  }
+}
+
 /*
 
 
