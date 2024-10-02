@@ -196,11 +196,9 @@ const App: React.FC = () => {
         <div className={styles.transcription} ref={transcriptionWrapperRef}>
           <p ref={transcriptionRef}>
             <span className={styles.transcriptionArchive}>
-              Hello World. This is a little demo app that transcribes everything
-              I say in realtime. It uses the whisper base model with
-              Transformers.js{/*transcription.output.archive.join(" ")*/}
+              {transcription.output.archive.join(" ")}
             </span>{" "}
-            <span>I am super{transcription.output.tempOutput}</span>
+            <span>{transcription.output.tempOutput}</span>
           </p>
         </div>
       </main>
