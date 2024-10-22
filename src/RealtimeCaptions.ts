@@ -53,6 +53,7 @@ class RealtimeCaptions extends EventTarget {
     this._outputArchive = archive;
     this.dispatchEvent(new Event("outputChanged"));
   }
+
   set tempOutput(output) {
     this._tempOutput = output;
     this.dispatchEvent(new Event("outputChanged"));

@@ -7,7 +7,6 @@ const useRealtimeCaptions = (): {
   start: (audioDeviceId: string, language?: string) => Promise<void>;
   stop: () => void;
   output: { archive: Array<string>; tempOutput: string; full: string };
-  tps: number;
   languages: Array<{ value: string; label: string }>;
 } => {
   const [output, setOutput] = React.useState<{
@@ -15,7 +14,6 @@ const useRealtimeCaptions = (): {
     tempOutput: string;
     full: string;
   }>({ archive: [], tempOutput: "", full: "" });
-  const [tps, setTps] = React.useState<number>(0);
   const [realtimeCaptionsInstance, setRealtimeCaptionsInstance] =
     React.useState<RealtimeCaptions>(null);
 
@@ -23,9 +21,6 @@ const useRealtimeCaptions = (): {
     const realtimeCaptions = new RealtimeCaptions();
     realtimeCaptions.addEventListener("outputChanged", () =>
       setOutput(realtimeCaptions.output),
-    );
-    realtimeCaptions.addEventListener("tpsChanged", () =>
-      setTps(realtimeCaptions.tps),
     );
 
     setRealtimeCaptionsInstance(realtimeCaptions);
@@ -42,7 +37,6 @@ const useRealtimeCaptions = (): {
       realtimeCaptionsInstance?.start(audioDeviceId, language),
     stop: realtimeCaptionsInstance?.stop,
     output,
-    tps,
     languages: realtimeCaptionsInstance?.languages || [],
   };
 };
