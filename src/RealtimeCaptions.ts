@@ -1,27 +1,17 @@
-import {
-  full,
-  PreTrainedTokenizer,
-  Processor,
-  PreTrainedModel,
-  AutoTokenizer,
-  AutoProcessor,
-  WhisperForConditionalGeneration,
-} from "@huggingface/transformers";
 import getAudioFromChunks from "./utils/getAudioFromChunks.ts";
-import transcribeAudio from "./utils/transcribeAudio.ts";
 import LANGUAGES from "./utils/languages.ts";
+import { WorkerResponse } from "./types.ts";
+import { v4 as uuidv4 } from "uuid";
 
 class RealtimeCaptions extends EventTarget {
+  private worker: Worker;
   private audioContext: AudioContext;
   private recorder: MediaRecorder;
   private stream: MediaStream;
   public recording: boolean = false;
   private chunks: Array<Blob> = [];
-  private tokenizer: PreTrainedTokenizer;
-  private processor: Processor;
-  private model: PreTrainedModel;
+  private modelReady: boolean = false;
   private modelBusy: boolean = false;
-  private _tps: number;
   private _tempOutput: string;
   private _outputArchive: Array<string> = [];
   private prevOutput: { count: number; output: string } = {
@@ -38,18 +28,14 @@ class RealtimeCaptions extends EventTarget {
     if (!navigator.mediaDevices.getUserMedia) {
       throw "getUserMedia not supported on your browser!";
     }
+
+    this.worker = new Worker(new URL("./worker.ts", import.meta.url), {
+      type: "module",
+    });
+
     if (logCallback) {
       this.logger = logCallback;
     }
-  }
-
-  get tps() {
-    return this._tps;
-  }
-
-  set tps(tps) {
-    this._tps = tps;
-    this.dispatchEvent(new Event("tpsChanged"));
   }
 
   get output() {
@@ -73,13 +59,7 @@ class RealtimeCaptions extends EventTarget {
   }
 
   get ready() {
-    return (
-      this.tokenizer &&
-      this.processor &&
-      this.model &&
-      this.audioContext &&
-      this.recorder
-    );
+    return Boolean(this.modelReady && this.audioContext && this.recorder);
   }
 
   public setUpAudio = async (
@@ -145,22 +125,30 @@ class RealtimeCaptions extends EventTarget {
     this.recorder?.requestData();
   };
 
-  private generate = async (audio: Float32Array): Promise<string> => {
-    this.modelBusy = true;
-    const output = await transcribeAudio(
-      audio,
-      this.language,
-      64,
-      this.tokenizer,
-      this.processor,
-      this.model,
-      (tps) => {
-        this.tps = tps;
-      },
-    );
-    this.modelBusy = false;
-    return output;
-  };
+  private generate = async (audio: Float32Array): Promise<string> =>
+    new Promise((resolve, reject) => {
+      this.modelBusy = true;
+      const requestId = uuidv4();
+      const listener = (e: MessageEvent<WorkerResponse>) => {
+        if (e.data.id !== requestId) return;
+        if (e.data.status === "complete") {
+          this.worker.removeEventListener("message", listener);
+          this.modelBusy = false;
+          resolve(e.data.text);
+        }
+        if (e.data.status === "error") {
+          this.worker.removeEventListener("message", listener);
+          this.modelBusy = false;
+          reject(e.data);
+        }
+      };
+      this.worker.addEventListener("message", listener);
+      this.worker.postMessage({
+        id: requestId,
+        audio,
+        language: this.language,
+      });
+    });
 
   public destroyAudio = () => {
     this.stream && this.stream.getAudioTracks().map((track) => track.stop());
@@ -168,43 +156,25 @@ class RealtimeCaptions extends EventTarget {
     this.recorder = null;
   };
 
-  private loadModel = async (callback: (data: any) => void) => {
-    const modelId = "onnx-community/whisper-base";
-    const tokenizerPromise = AutoTokenizer.from_pretrained(modelId, {
-      progress_callback: callback,
+  private loadModel = (callback: (data: any) => void): Promise<void> =>
+    new Promise((resolve, reject) => {
+      const requestId = uuidv4();
+      const listener = (e: MessageEvent<WorkerResponse>) => {
+        if (e.data.id !== requestId) return;
+        callback && callback(e.data);
+        if (e.data.status === "complete") {
+          this.worker.removeEventListener("message", listener);
+          this.modelReady = true;
+          resolve();
+        }
+        if (e.data.status === "error") {
+          this.worker.removeEventListener("message", listener);
+          reject(e.data);
+        }
+      };
+      this.worker.addEventListener("message", listener);
+      this.worker.postMessage({ id: requestId });
     });
-
-    const processorPromise = AutoProcessor.from_pretrained(modelId, {
-      progress_callback: callback,
-    });
-
-    const modelPromise = WhisperForConditionalGeneration.from_pretrained(
-      modelId,
-      {
-        dtype: {
-          encoder_model: "fp32", // 'fp16' works too
-          decoder_model_merged: "q4", // or 'fp32' ('fp16' is broken)
-        },
-        device: "webgpu",
-        progress_callback: callback,
-      },
-    );
-
-    const [tokenizer, processor, model] = await Promise.all([
-      tokenizerPromise,
-      processorPromise,
-      modelPromise,
-    ]);
-
-    await model.generate({
-      input_features: full([1, 80, 3000], 0.0),
-      max_new_tokens: 1,
-    });
-
-    this.tokenizer = tokenizer;
-    this.processor = processor;
-    this.model = model;
-  };
 
   public setUp = async (audioDeviceId: string) => {
     if (this.ready) return;

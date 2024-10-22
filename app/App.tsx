@@ -122,13 +122,10 @@ const App: React.FC = () => {
                     className={cn(styles.select, styles.selectMic)}
                     disabled={state === State.RUNNING}
                     onChange={(e) => setActiveAudioDevice(e.target.value)}
+                    value={activeAudioDevice || ""}
                   >
                     {audioDevices.map((device) => (
-                      <option
-                        selected={device.deviceId === activeAudioDevice}
-                        value={device.deviceId}
-                        key={device.deviceId}
-                      >
+                      <option value={device.deviceId} key={device.deviceId}>
                         {device.label}
                       </option>
                     ))}
@@ -145,15 +142,12 @@ const App: React.FC = () => {
                     className={cn(styles.select, styles.selectLang)}
                     disabled={state === State.RUNNING}
                     onChange={(e) => setActiveLanguage(e.target.value)}
+                    value={activeLanguage}
                   >
                     {transcription.languages
                       .sort((a, b) => (a.label < b.label ? -1 : 1))
                       .map((language) => (
-                        <option
-                          selected={language.value === activeLanguage}
-                          value={language.value}
-                          key={language.value}
-                        >
+                        <option value={language.value} key={language.value}>
                           {language.label}
                         </option>
                       ))}
